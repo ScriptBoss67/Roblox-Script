@@ -75,6 +75,9 @@
             max-width: 100%;
             border-radius: 8px;
             margin: 10px 0;
+            min-height: 60px;
+            object-fit: cover;
+            background: #2a2a4a;
         }
         .code-wrap {
             margin: 10px 0;
@@ -87,6 +90,10 @@
             border-radius: 4px;
             cursor: pointer;
             margin-bottom: 5px;
+            transition: background 0.2s;
+        }
+        .toggle-btn:hover {
+            background: #3a5f99;
         }
         .script-code {
             background: #0f3460;
@@ -95,7 +102,10 @@
             font-family: monospace;
             white-space: pre-wrap;
             word-break: break-all;
-            cursor: pointer;
+            display: none;
+            max-height: 300px;
+            overflow: auto;
+            cursor: text;
         }
         .no-result {
             text-align: center;
@@ -116,47 +126,51 @@
             display: none;
             z-index: 999;
         }
+        .copy-btn {
+            background: #00d4ff;
+            color: #000;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 8px;
+        }
     </style>
 </head>
 <body>
 
-<!-- Copy Tip -->
 <div class="copy-tip" id="copyTip">Copied!</div>
 
-<!-- Site Header -->
 <div class="header">
     <h1>Script Hub</h1>
     <div class="total-count" id="totalScripts">Total Scripts: 0</div>
 </div>
 
-<!-- Search Box -->
 <div class="search-box">
     <input type="text" class="search-input" id="searchInput" placeholder="🔍 Search script...">
 </div>
 
-<!-- Script Container -->
 <div id="scriptList">
-    <!-- Script 1 -->
-    <div class="script-item" data-title="Axon Hub" data-time="2026-06-07">
+    <div class="script-item" data-title="Aeonic hub" data-time="2026-06-07">
         <h3 class="script-title">
             <span class="order-number">#1</span>
-            Axon Hub
+            Aeonic hub
         </h3>
         <div class="time-info">
             Published: 2026-06-07<br>
             Updated: 2026-06-07
         </div>
-        <img class="script-img" src="https://i.postimg.cc/TPhJqq9S/IMG-20260607-170156.png" alt="Script Preview">
+        <img class="script-img" src="https://i.postimg.cc/Hn8fM5V1/IMG-20260609-211410.png" alt="Script Preview">
         
         <div class="code-wrap">
             <button class="toggle-btn" onclick="toggleCode('s1')">Show / Hide Code</button>
-            <div class="script-code" id="s1" onclick="copyCode(this)">
-loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/97c3f6db55a2cf72141537a85458e5a7.lua"))()
+            <div class="script-code" id="s1">
+loadstring(game:HttpGet("https://raw.githubusercontent.com/OhhMyGehlee/sh/refs/heads/main/a"))()
             </div>
+            <button class="copy-btn" onclick="copyCode('s1')">Copy Script</button>
         </div>
     </div>
 
-    <!-- Script Template -->
     <div class="script-item" data-title="New Script" data-time="2026-06-08">
         <h3 class="script-title">
             <span class="order-number">#2</span>
@@ -170,27 +184,26 @@ loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/97c3f6db55a2cf
         
         <div class="code-wrap">
             <button class="toggle-btn" onclick="toggleCode('s2')">Show / Hide Code</button>
-            <div class="script-code" id="s2" onclick="copyCode(this)">
+            <div class="script-code" id="s2">
 -- Paste your script here
             </div>
+            <button class="copy-btn" onclick="copyCode('s2')">Copy Script</button>
         </div>
     </div>
 </div>
 
-<!-- No Result Tip -->
 <div class="no-result" id="noResult">
     No scripts found
 </div>
 
 <script>
-// Update total scripts count
 function updateTotal() {
     const total = document.querySelectorAll('.script-item').length;
     document.getElementById('totalScripts').innerText = `Total Scripts: ${total}`;
 }
 
-// One-click copy code
-function copyCode(el) {
+function copyCode(id) {
+    const el = document.getElementById(id);
     const text = el.innerText.trim();
     navigator.clipboard.writeText(text).then(() => {
         const tip = document.getElementById('copyTip');
@@ -199,13 +212,11 @@ function copyCode(el) {
     });
 }
 
-// Toggle code show/hide
 function toggleCode(id) {
     const codeBox = document.getElementById(id);
     codeBox.style.display = codeBox.style.display === 'none' ? 'block' : 'none';
 }
 
-// Sort by latest time & re-number
 function sortScripts() {
     const list = document.getElementById('scriptList');
     const items = Array.from(list.querySelectorAll('.script-item'));
@@ -218,7 +229,6 @@ function sortScripts() {
     updateTotal();
 }
 
-// Search function
 const searchInput = document.getElementById('searchInput');
 const noResult = document.getElementById('noResult');
 searchInput.addEventListener('input', function() {
@@ -237,9 +247,9 @@ searchInput.addEventListener('input', function() {
     noResult.style.display = hasVisible ? 'none' : 'block';
 });
 
-// Init page
 window.onload = sortScripts;
 </script>
 
 </body>
 </html>
+
