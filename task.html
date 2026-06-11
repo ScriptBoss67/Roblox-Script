@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Unlock Reward</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: #0d1117;
+            color: #e6edf3;
+            min-height: 100vh;
+            padding: 20px;
+            background-image: radial-gradient(circle at top, #1a1f2b 0%, #0d1117 70%);
+        }
+
+        .container {
+            max-width: 450px;
+            margin: 0 auto;
+        }
+
+        .task-card {
+            background: #161b22;
+            border-radius: 12px;
+            border: 1px solid #30363d;
+            padding: 20px;
+            margin-top: 30px;
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.1);
+        }
+
+        .task-card h2 {
+            font-size: 22px;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        .task-item {
+            background: #21262d;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            border: 1px solid #30363d;
+            transition: all 0.2s;
+        }
+
+        .task-item:hover {
+            border-color: #a855f7;
+            box-shadow: 0 0 10px rgba(168, 85, 247, 0.2);
+        }
+
+        .task-item.completed {
+            border-color: #a855f7;
+            background: rgba(168, 85, 247, 0.1);
+            cursor: default;
+        }
+
+        .task-item.lock {
+            opacity: 0.35;
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+
+        .task-item[disabled] {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .task-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .task-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(168, 85, 247, 0.15);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #a855f7;
+            font-size: 20px;
+        }
+
+        .task-info h3 {
+            font-size: 16px;
+            margin-bottom: 4px;
+            color: #fff;
+        }
+
+        .task-info p {
+            font-size: 13px;
+            color: #8b949e;
+        }
+
+        .task-arrow {
+            color: #8b949e;
+            font-size: 18px;
+        }
+
+        .open-video-btn {
+            background: #6366f1;
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .claim-btn {
+            width: 100%;
+            padding: 18px;
+            background: repeating-linear-gradient(
+                45deg,
+                #21262d,
+                #21262d 10px,
+                #30363d 10px,
+                #30363d 20px
+            );
+            border: none;
+            border-radius: 8px;
+            color: #8b949e;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: not-allowed;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+
+        .claim-btn.unlocked {
+            background: linear-gradient(90deg, #a855f7, #6366f1);
+            color: #fff;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="task-card">
+            <h2>Complete Tasks to Continue</h2>
+
+            <div class="task-item" id="task1" onclick="goToTikTok()">
+                <div class="task-left">
+                    <div class="task-icon">✦</div>
+                    <div class="task-info">
+                        <h3>Follow Account</h3>
+                        <p id="task1Tip">Open profile<br>Wait 10 seconds</p>
+                    </div>
+                </div>
+                <span class="task-arrow">➔</span>
+            </div>
+
+            <div class="task-item lock" onclick="toggleTask(1)">
+                <div class="task-left">
+                    <div class="task-icon">✦</div>
+                    <div class="task-info">
+                        <h3>Watch Video</h3>
+                        <p>Watch until the end</p>
+                    </div>
+                </div>
+                <button class="open-video-btn" onclick="openLatestVideo(event)">Open Latest Video</button>
+            </div>
+
+            <div class="task-item lock" onclick="toggleTask(2)">
+                <div class="task-left">
+                    <div class="task-icon">✦</div>
+                    <div class="task-info">
+                        <h3>Like Video</h3>
+                        <p>Like the latest video</p>
+                    </div>
+                </div>
+                <button class="open-video-btn" onclick="openLatestVideo(event)">Open Video</button>
+            </div>
+
+            <div class="task-item lock" onclick="toggleTask(3)">
+                <div class="task-left">
+                    <div class="task-icon">✦</div>
+                    <div class="task-info">
+                        <h3>Comment Video</h3>
+                        <p>Leave a comment below</p>
+                    </div>
+                </div>
+                <button class="open-video-btn" onclick="openLatestVideo(event)">Open Video</button>
+            </div>
+
+            <button class="claim-btn" id="claimBtn" disabled>🔒 Get Reward</button>
+        </div>
+    </div>
+
+    <script>
+        // Paste your latest TikTok video link here
+        const LATEST_TIKTOK_VIDEO = "Paste your latest TikTok video link here";
+
+        // Fixed links, do not edit
+        const TIKTOK_PROFILE = "https://www.tiktok.com/@scriptboss67";
+        const SCRIPT_PAGE = "https://scriptboss67.github.io/Roblox-Script/";
+
+        const taskList = document.querySelectorAll('.task-item');
+        const claimBtn = document.getElementById('claimBtn');
+        const task1 = document.getElementById('task1');
+        const task1Tip = document.getElementById('task1Tip');
+
+        let completedIndex = -1;
+        let timerRunning = false;
+
+        function openLatestVideo(e) {
+            e.stopPropagation();
+            window.open(LATEST_TIKTOK_VIDEO, '_blank');
+        }
+
+        function unlockNext() {
+            completedIndex++;
+            if (completedIndex < taskList.length - 1) {
+                taskList[completedIndex + 1].classList.remove('lock');
+            }
+            checkAllCompleted();
+        }
+
+        function toggleTask(idx) {
+            if (idx !== completedIndex) return;
+            taskList[idx].classList.add('completed');
+            unlockNext();
+        }
+
+        function goToTikTok() {
+            if (task1.classList.contains('completed') || timerRunning) return;
+            timerRunning = true;
+            task1.setAttribute('disabled', true);
+
+            let newWin = window.open(TIKTOK_PROFILE, '_blank');
+            if (!newWin) window.location.href = TIKTOK_PROFILE;
+
+            const start = Date.now();
+            task1Tip.innerText = "Waiting: 10s";
+
+            const timer = setInterval(() => {
+                const diff = Date.now() - start;
+                let remain = Math.ceil((10000 - diff) / 1000);
+                if (remain <= 0) {
+                    clearInterval(timer);
+                    task1.classList.add('completed');
+                    timerRunning = false;
+                    task1.removeAttribute('disabled');
+                    task1Tip.innerText = "Completed";
+                    unlockNext();
+                    return;
+                }
+                task1Tip.innerText = `Waiting: ${remain}s`;
+            }, 1000);
+        }
+
+        function checkAllCompleted() {
+            if (completedIndex === taskList.length - 1) {
+                claimBtn.disabled = false;
+                claimBtn.classList.add('unlocked');
+                claimBtn.textContent = '✅ Get Reward';
+            } else {
+                claimBtn.disabled = true;
+                claimBtn.classList.remove('unlocked');
+                claimBtn.textContent = '🔒 Get Reward';
+            }
+        }
+
+        claimBtn.addEventListener('click', () => {
+            if (!claimBtn.disabled) {
+                window.location.href = SCRIPT_PAGE;
+            }
+        });
+    </script>
+</body>
+</html>
