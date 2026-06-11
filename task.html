@@ -151,137 +151,113 @@
         <div class="task-card">
             <h2>Complete Tasks to Continue</h2>
 
-            <div class="task-item" id="task1" onclick="startTask(0)">
+            <div class="task-item" id="task1" onclick="doTask(0)">
                 <div class="task-left">
                     <div class="task-icon">✦</div>
                     <div class="task-info">
                         <h3>Follow Account</h3>
-                        <p id="tip1">Stay 10 seconds then return</p>
+                        <p id="txt1">Stay 10 seconds then return</p>
                     </div>
                 </div>
                 <span class="task-arrow">➔</span>
             </div>
 
-            <div class="task-item lock" id="task2" onclick="startTask(1)">
+            <div class="task-item lock" id="task2" onclick="doTask(1)">
                 <div class="task-left">
                     <div class="task-icon">✦</div>
                     <div class="task-info">
                         <h3>Watch Video</h3>
-                        <p id="tip2">Watch until the end</p>
+                        <p id="txt2">Watch until the end</p>
                     </div>
                 </div>
                 <span class="task-arrow">➔</span>
             </div>
 
-            <div class="task-item lock" id="task3" onclick="startTask(2)">
+            <div class="task-item lock" id="task3" onclick="doTask(2)">
                 <div class="task-left">
                     <div class="task-icon">✦</div>
                     <div class="task-info">
                         <h3>Like Video</h3>
-                        <p id="tip3">Like the latest video</p>
+                        <p id="txt3">Like the latest video</p>
                     </div>
                 </div>
                 <span class="task-arrow">➔</span>
             </div>
 
-            <div class="task-item lock" id="task4" onclick="startTask(3)">
+            <div class="task-item lock" id="task4" onclick="doTask(3)">
                 <div class="task-left">
                     <div class="task-icon">✦</div>
                     <div class="task-info">
                         <h3>Comment Video</h3>
-                        <p id="tip4">Leave a comment below</p>
+                        <p id="txt4">Leave a comment below</p>
                     </div>
                 </div>
                 <span class="task-arrow">➔</span>
             </div>
 
-            <button class="claim-btn" id="claimBtn" disabled>🔒 Get Reward</button>
+            <button class="claim-btn" id="rewardBtn" disabled>🔒 Get Reward</button>
         </div>
     </div>
 
     <script>
-        // Replace with your latest TikTok video link
-        const LATEST_TIKTOK_VIDEO = "Paste your latest TikTok video link here";
-        const TIKTOK_PROFILE = "https://www.tiktok.com/@scriptboss67";
-        const SCRIPT_PAGE = "https://scriptboss67.github.io/Roblox-Script/";
+        // 你的视频链接
+        const VIDEO_LINK = "Paste your latest TikTok video link here";
+        // TikTok主页
+        const PROFILE_LINK = "https://www.tiktok.com/@scriptboss67";
+        // 跳转脚本主页
+        const HOME_LINK = "https://scriptboss67.github.io/Roblox-Script/";
 
-        const taskList = document.querySelectorAll('.task-item');
-        const claimBtn = document.getElementById('claimBtn');
-        const tips = [
-            document.getElementById('tip1'),
-            document.getElementById('tip2'),
-            document.getElementById('tip3'),
-            document.getElementById('tip4')
+        const tasks = document.querySelectorAll(".task-item");
+        const texts = [
+            document.getElementById("txt1"),
+            document.getElementById("txt2"),
+            document.getElementById("txt3"),
+            document.getElementById("txt4")
         ];
+        const rewardBtn = document.getElementById("rewardBtn");
 
-        let completedIndex = -1;
-        let currentHandler = null;
+        let nowTask = 0;
 
-        function unlockNext() {
-            completedIndex++;
-            if (completedIndex < taskList.length - 1) {
-                taskList[completedIndex + 1].classList.remove('lock');
-            }
-            checkAllCompleted();
-        }
+        function doTask(index) {
+            // 只能按顺序做任务
+            if (index !== nowTask || tasks[index].classList.contains("completed")) return;
 
-        function checkAllCompleted() {
-            if (completedIndex === taskList.length - 1) {
-                claimBtn.disabled = false;
-                claimBtn.classList.add('unlocked');
-                claimBtn.textContent = '✅ Get Reward';
-            } else {
-                claimBtn.disabled = true;
-                claimBtn.classList.remove('unlocked');
-                claimBtn.textContent = '🔒 Get Reward';
-            }
-        }
+            let link = index === 0 ? PROFILE_LINK : VIDEO_LINK;
+            window.open(link, "_blank");
 
-        function startTask(idx) {
-            // 仅允许解锁后的当前任务点击
-            if (idx !== completedIndex + 1 || taskList[idx].classList.contains('completed')) return;
+            let count = 10;
+            texts[index].innerText = `Waiting: ${count}s`;
+            tasks[index].style.pointerEvents = "none";
 
-            const task = taskList[idx];
-            const tip = tips[idx];
-            const originalText = tip.innerText;
-            const targetLink = idx === 0 ? TIKTOK_PROFILE : LATEST_TIKTOK_VIDEO;
+            const timer = setInterval(() => {
+                count--;
+                texts[index].innerText = `Waiting: ${count}s`;
 
-            tip.innerText = "In progress...";
-            task.style.pointerEvents = "none";
-            const startTime = Date.now();
+                if (count <= 0) {
+                    clearInterval(timer);
+                    // 任务完成
+                    tasks[index].classList.add("completed");
+                    texts[index].innerText = "Completed";
+                    nowTask++;
 
-            // 清除旧监听，防止冲突
-            if (currentHandler) {
-                document.removeEventListener('visibilitychange', currentHandler);
-            }
-
-            currentHandler = function() {
-                if (document.visibilityState === "visible") {
-                    const spendTime = Date.now() - startTime;
-                    if (spendTime >= 10000) {
-                        // 满10秒，任务完成
-                        task.classList.add('completed');
-                        tip.innerText = "Completed";
-                        unlockNext();
-                    } else {
-                        // 不足10秒，恢复可点击
-                        tip.innerText = originalText;
-                        task.style.pointerEvents = "auto";
+                    // 解锁下一个任务
+                    if (nowTask < tasks.length) {
+                        tasks[nowTask].classList.remove("lock");
+                        tasks[nowTask].style.pointerEvents = "auto";
                     }
-                    document.removeEventListener('visibilitychange', currentHandler);
-                    currentHandler = null;
-                }
-            };
 
-            document.addEventListener('visibilitychange', currentHandler);
-            window.open(targetLink, '_blank');
+                    // 全部完成 解锁奖励
+                    if (nowTask >= tasks.length) {
+                        rewardBtn.disabled = false;
+                        rewardBtn.classList.add("unlocked");
+                        rewardBtn.innerText = "✅ Get Reward";
+                    }
+                }
+            }, 1000);
         }
 
-        // 跳转至脚本主页
-        claimBtn.addEventListener('click', () => {
-            if (!claimBtn.disabled) {
-                window.location.href = SCRIPT_PAGE;
-            }
+        rewardBtn.addEventListener("click", () => {
+            location.href = HOME_LINK;
         });
     </script>
 </body>
