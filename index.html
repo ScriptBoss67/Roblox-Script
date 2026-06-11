@@ -102,7 +102,7 @@
             font-family: monospace;
             white-space: pre-wrap;
             word-break: break-all;
-            display: none;
+            display:none;
             max-height: 300px;
             overflow: auto;
             cursor: text;
@@ -163,7 +163,7 @@
         <img class="script-img" src="https://i.postimg.cc/Hn8fM5V1/IMG-20260609-211410.png" alt="Script Preview">
         
         <div class="code-wrap">
-            <button class="toggle-btn" onclick="toggleCode('s1')">Show / Hide Code</button>
+            <button class="toggle-btn" onclick="toggleCode('s1')">Show / Hide Script</button>
             <div class="script-code" id="s1">
 loadstring(game:HttpGet("https://raw.githubusercontent.com/OhhMyGehlee/sh/refs/heads/main/a"))()
             </div>
@@ -183,7 +183,7 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/OhhMyGehlee/sh/refs/h
         <img class="script-img" src="" alt="Script Preview">
         
         <div class="code-wrap">
-            <button class="toggle-btn" onclick="toggleCode('s2')">Show / Hide Code</button>
+            <button class="toggle-btn" onclick="toggleCode('s2')">Show / Hide Script</button>
             <div class="script-code" id="s2">
 -- Paste your script here
             </div>
@@ -212,9 +212,16 @@ function copyCode(id) {
     });
 }
 
+const codeStates = {};
 function toggleCode(id) {
     const codeBox = document.getElementById(id);
-    codeBox.style.display = codeBox.style.display === 'none' ? 'block' : 'none';
+    if (codeStates[id]) {
+        codeBox.style.display = 'none';
+        codeStates[id] = false;
+    } else {
+        codeBox.style.display = 'block';
+        codeStates[id] = true;
+    }
 }
 
 function sortScripts() {
@@ -252,4 +259,3 @@ window.onload = sortScripts;
 
 </body>
 </html>
-
