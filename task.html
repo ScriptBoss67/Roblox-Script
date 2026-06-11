@@ -25,12 +25,19 @@
             margin: 0 auto;
         }
 
+        .tip-title {
+            text-align: center;
+            font-size: 15px;
+            color: #ffcc00;
+            margin-bottom: 15px;
+        }
+
         .task-card {
             background: #161b22;
             border-radius: 12px;
             border: 1px solid #30363d;
             padding: 20px;
-            margin-top: 30px;
+            margin-top: 10px;
             box-shadow: 0 0 15px rgba(168, 85, 247, 0.1);
         }
 
@@ -38,6 +45,7 @@
             font-size: 22px;
             margin-bottom: 20px;
             color: #fff;
+            text-align: center;
         }
 
         .task-item {
@@ -109,16 +117,6 @@
             font-size: 18px;
         }
 
-        .open-video-btn {
-            background: #6366f1;
-            color: #fff;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 13px;
-            cursor: pointer;
-        }
-
         .claim-btn {
             width: 100%;
             padding: 18px;
@@ -148,51 +146,54 @@
 </head>
 <body>
     <div class="container">
+        <!-- 新增英文提示标题 -->
+        <div class="tip-title">Each task requires staying for 10 seconds to complete</div>
+
         <div class="task-card">
             <h2>Complete Tasks to Continue</h2>
 
-            <div class="task-item" id="task1" onclick="goToTikTok()">
+            <div class="task-item" id="task1" onclick="startTask(0)">
                 <div class="task-left">
                     <div class="task-icon">✦</div>
                     <div class="task-info">
                         <h3>Follow Account</h3>
-                        <p id="task1Tip">Stay 10 seconds then return</p>
+                        <p id="tip1">Stay 10 seconds then return</p>
                     </div>
                 </div>
                 <span class="task-arrow">➔</span>
             </div>
 
-            <div class="task-item lock" onclick="toggleTask(1)">
+            <div class="task-item lock" id="task2" onclick="startTask(1)">
                 <div class="task-left">
                     <div class="task-icon">✦</div>
                     <div class="task-info">
                         <h3>Watch Video</h3>
-                        <p>Watch until the end</p>
+                        <p id="tip2">Watch until the end</p>
                     </div>
                 </div>
-                <button class="open-video-btn" onclick="openLatestVideo(event)">Open Latest Video</button>
+                <span class="task-arrow">➔</span>
             </div>
 
-            <div class="task-item lock" onclick="toggleTask(2)">
+            <div class="task-item lock" id="task3" onclick="startTask(2)">
                 <div class="task-left">
                     <div class="task-icon">✦</div>
                     <div class="task-info">
                         <h3>Like Video</h3>
-                        <p>Like the latest video</p>
+                        <p id="tip3">Like the latest video</p>
                     </div>
                 </div>
-                <button class="open-video-btn" onclick="openLatestVideo(event)">Open Video</button>
+                <span class="task-arrow">➔</span>
             </div>
 
-            <div class="task-item lock" onclick="toggleTask(3)">
+            <div class="task-item lock" id="task4" onclick="startTask(3)">
                 <div class="task-left">
                     <div class="task-icon">✦</div>
                     <div class="task-info">
                         <h3>Comment Video</h3>
-                        <p>Leave a comment below</p>
+                        <p id="tip4">Leave a comment below</p>
                     </div>
                 </div>
-                <button class="open-video-btn" onclick="openLatestVideo(event)">Open Video</button>
+                <span class="task-arrow">➔</span>
             </div>
 
             <button class="claim-btn" id="claimBtn" disabled>🔒 Get Reward</button>
@@ -209,17 +210,15 @@
 
         const taskList = document.querySelectorAll('.task-item');
         const claimBtn = document.getElementById('claimBtn');
-        const task1 = document.getElementById('task1');
-        const task1Tip = document.getElementById('task1Tip');
+        const tips = [
+            document.getElementById('tip1'),
+            document.getElementById('tip2'),
+            document.getElementById('tip3'),
+            document.getElementById('tip4')
+        ];
 
         let completedIndex = -1;
-        let timerRunning = false;
-        let leaveTime = 0;
-
-        function openLatestVideo(e) {
-            e.stopPropagation();
-            window.open(LATEST_TIKTOK_VIDEO, '_blank');
-        }
+        let visibilityHandler = null;
 
         function unlockNext() {
             completedIndex++;
@@ -227,39 +226,6 @@
                 taskList[completedIndex + 1].classList.remove('lock');
             }
             checkAllCompleted();
-        }
-
-        function toggleTask(idx) {
-            if (idx !== completedIndex) return;
-            taskList[idx].classList.add('completed');
-            unlockNext();
-        }
-
-        function goToTikTok() {
-            if (task1.classList.contains('completed') || timerRunning) return;
-
-            timerRunning = true;
-            task1.setAttribute('disabled', true);
-            leaveTime = Date.now();
-            task1Tip.innerText = "In progress...";
-
-            // 监听页面切回
-            function checkBack() {
-                if (document.visibilityState === 'visible') {
-                    const stayTime = Date.now() - leaveTime;
-                    // 累计停留满10秒
-                    if (stayTime >= 10000) {
-                        task1.classList.add('completed');
-                        task1Tip.innerText = "Completed";
-                        unlockNext();
-                        timerRunning = false;
-                        document.removeEventListener('visibilitychange', checkBack);
-                    }
-                }
-            }
-            document.addEventListener('visibilitychange', checkBack);
-            // 新开TikTok页面
-            window.open(TIKTOK_PROFILE, '_blank');
         }
 
         function checkAllCompleted() {
@@ -272,6 +238,45 @@
                 claimBtn.classList.remove('unlocked');
                 claimBtn.textContent = '🔒 Get Reward';
             }
+        }
+
+        function startTask(idx) {
+            if (idx !== completedIndex + 1 || taskList[idx].classList.contains('completed')) return;
+
+            const task = taskList[idx];
+            const tip = tips[idx];
+            const originalText = tip.innerText;
+            const link = idx === 0 ? TIKTOK_PROFILE : LATEST_TIKTOK_VIDEO;
+
+            tip.innerText = "In progress...";
+            task.setAttribute('disabled', true);
+
+            const leaveStamp = Date.now();
+
+            if (visibilityHandler) {
+                document.removeEventListener('visibilitychange', visibilityHandler);
+            }
+
+            visibilityHandler = function() {
+                if (document.visibilityState === 'visible') {
+                    const stayTime = Date.now() - leaveStamp;
+                    if (stayTime >= 10000) {
+                        task.classList.add('completed');
+                        tip.innerText = "Completed";
+                        unlockNext();
+                        document.removeEventListener('visibilitychange', visibilityHandler);
+                        visibilityHandler = null;
+                    } else {
+                        tip.innerText = originalText;
+                        task.removeAttribute('disabled');
+                        document.removeEventListener('visibilitychange', visibilityHandler);
+                        visibilityHandler = null;
+                    }
+                }
+            };
+
+            document.addEventListener('visibilitychange', visibilityHandler);
+            window.open(link, '_blank');
         }
 
         claimBtn.addEventListener('click', () => {
