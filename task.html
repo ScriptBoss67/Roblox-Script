@@ -156,7 +156,7 @@
                     <div class="task-icon">✦</div>
                     <div class="task-info">
                         <h3>Follow Account</h3>
-                        <p id="task1Tip">Open profile<br>Wait 10 seconds</p>
+                        <p id="task1Tip">Stay 10 seconds then return</p>
                     </div>
                 </div>
                 <span class="task-arrow">➔</span>
@@ -214,6 +214,7 @@
 
         let completedIndex = -1;
         let timerRunning = false;
+        let leaveTime = 0;
 
         function openLatestVideo(e) {
             e.stopPropagation();
@@ -236,29 +237,29 @@
 
         function goToTikTok() {
             if (task1.classList.contains('completed') || timerRunning) return;
+
             timerRunning = true;
             task1.setAttribute('disabled', true);
+            leaveTime = Date.now();
+            task1Tip.innerText = "In progress...";
 
-            let newWin = window.open(TIKTOK_PROFILE, '_blank');
-            if (!newWin) window.location.href = TIKTOK_PROFILE;
-
-            const start = Date.now();
-            task1Tip.innerText = "Waiting: 10s";
-
-            const timer = setInterval(() => {
-                const diff = Date.now() - start;
-                let remain = Math.ceil((10000 - diff) / 1000);
-                if (remain <= 0) {
-                    clearInterval(timer);
-                    task1.classList.add('completed');
-                    timerRunning = false;
-                    task1.removeAttribute('disabled');
-                    task1Tip.innerText = "Completed";
-                    unlockNext();
-                    return;
+            // 监听页面切回
+            function checkBack() {
+                if (document.visibilityState === 'visible') {
+                    const stayTime = Date.now() - leaveTime;
+                    // 累计停留满10秒
+                    if (stayTime >= 10000) {
+                        task1.classList.add('completed');
+                        task1Tip.innerText = "Completed";
+                        unlockNext();
+                        timerRunning = false;
+                        document.removeEventListener('visibilitychange', checkBack);
+                    }
                 }
-                task1Tip.innerText = `Waiting: ${remain}s`;
-            }, 1000);
+            }
+            document.addEventListener('visibilitychange', checkBack);
+            // 新开TikTok页面
+            window.open(TIKTOK_PROFILE, '_blank');
         }
 
         function checkAllCompleted() {
