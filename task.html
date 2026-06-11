@@ -146,7 +146,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- 新增英文提示标题 -->
         <div class="tip-title">Each task requires staying for 10 seconds to complete</div>
 
         <div class="task-card">
@@ -201,10 +200,8 @@
     </div>
 
     <script>
-        // Paste your latest TikTok video link here
+        // Replace with your latest TikTok video link
         const LATEST_TIKTOK_VIDEO = "Paste your latest TikTok video link here";
-
-        // Fixed links, do not edit
         const TIKTOK_PROFILE = "https://www.tiktok.com/@scriptboss67";
         const SCRIPT_PAGE = "https://scriptboss67.github.io/Roblox-Script/";
 
@@ -218,7 +215,7 @@
         ];
 
         let completedIndex = -1;
-        let visibilityHandler = null;
+        let currentHandler = null;
 
         function unlockNext() {
             completedIndex++;
@@ -241,44 +238,46 @@
         }
 
         function startTask(idx) {
+            // 仅允许解锁后的当前任务点击
             if (idx !== completedIndex + 1 || taskList[idx].classList.contains('completed')) return;
 
             const task = taskList[idx];
             const tip = tips[idx];
             const originalText = tip.innerText;
-            const link = idx === 0 ? TIKTOK_PROFILE : LATEST_TIKTOK_VIDEO;
+            const targetLink = idx === 0 ? TIKTOK_PROFILE : LATEST_TIKTOK_VIDEO;
 
             tip.innerText = "In progress...";
-            task.setAttribute('disabled', true);
+            task.style.pointerEvents = "none";
+            const startTime = Date.now();
 
-            const leaveStamp = Date.now();
-
-            if (visibilityHandler) {
-                document.removeEventListener('visibilitychange', visibilityHandler);
+            // 清除旧监听，防止冲突
+            if (currentHandler) {
+                document.removeEventListener('visibilitychange', currentHandler);
             }
 
-            visibilityHandler = function() {
-                if (document.visibilityState === 'visible') {
-                    const stayTime = Date.now() - leaveStamp;
-                    if (stayTime >= 10000) {
+            currentHandler = function() {
+                if (document.visibilityState === "visible") {
+                    const spendTime = Date.now() - startTime;
+                    if (spendTime >= 10000) {
+                        // 满10秒，任务完成
                         task.classList.add('completed');
                         tip.innerText = "Completed";
                         unlockNext();
-                        document.removeEventListener('visibilitychange', visibilityHandler);
-                        visibilityHandler = null;
                     } else {
+                        // 不足10秒，恢复可点击
                         tip.innerText = originalText;
-                        task.removeAttribute('disabled');
-                        document.removeEventListener('visibilitychange', visibilityHandler);
-                        visibilityHandler = null;
+                        task.style.pointerEvents = "auto";
                     }
+                    document.removeEventListener('visibilitychange', currentHandler);
+                    currentHandler = null;
                 }
             };
 
-            document.addEventListener('visibilitychange', visibilityHandler);
-            window.open(link, '_blank');
+            document.addEventListener('visibilitychange', currentHandler);
+            window.open(targetLink, '_blank');
         }
 
+        // 跳转至脚本主页
         claimBtn.addEventListener('click', () => {
             if (!claimBtn.disabled) {
                 window.location.href = SCRIPT_PAGE;
