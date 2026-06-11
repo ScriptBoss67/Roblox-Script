@@ -156,7 +156,7 @@
                     <div class="task-icon">✦</div>
                     <div class="task-info">
                         <h3>Follow Account</h3>
-                        <p id="txt1">Stay 10 seconds then return</p>
+                        <p id="txt1">Stay 40 seconds then return</p>
                     </div>
                 </div>
                 <span class="task-arrow">➔</span>
@@ -200,11 +200,8 @@
     </div>
 
     <script>
-        // 已填入你的视频链接
         const VIDEO_LINK = "https://vt.tiktok.com/ZSQf2TYqJ/";
-        // TikTok主页
         const PROFILE_LINK = "https://www.tiktok.com/@scriptboss67";
-        // 跳转脚本主页
         const HOME_LINK = "https://scriptboss67.github.io/Roblox-Script/";
 
         const tasks = document.querySelectorAll(".task-item");
@@ -217,15 +214,15 @@
         const rewardBtn = document.getElementById("rewardBtn");
 
         let nowTask = 0;
+        const WAIT_TIME = 40; // 统一40秒计时
 
         function doTask(index) {
-            // 只能按顺序做任务
             if (index !== nowTask || tasks[index].classList.contains("completed")) return;
 
             let link = index === 0 ? PROFILE_LINK : VIDEO_LINK;
             window.open(link, "_blank");
 
-            let count = 10;
+            let count = WAIT_TIME;
             texts[index].innerText = `Waiting: ${count}s`;
             tasks[index].style.pointerEvents = "none";
 
@@ -235,18 +232,15 @@
 
                 if (count <= 0) {
                     clearInterval(timer);
-                    // 任务完成
                     tasks[index].classList.add("completed");
                     texts[index].innerText = "Completed";
                     nowTask++;
 
-                    // 解锁下一个任务
                     if (nowTask < tasks.length) {
                         tasks[nowTask].classList.remove("lock");
                         tasks[nowTask].style.pointerEvents = "auto";
                     }
 
-                    // 全部完成 解锁奖励
                     if (nowTask >= tasks.length) {
                         rewardBtn.disabled = false;
                         rewardBtn.classList.add("unlocked");
