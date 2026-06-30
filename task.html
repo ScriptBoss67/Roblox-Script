@@ -72,12 +72,6 @@
             cursor: default;
         }
 
-        .task-item.lock {
-            opacity: 0.35;
-            pointer-events: none;
-            cursor: not-allowed;
-        }
-
         .task-item[disabled] {
             opacity: 0.7;
             pointer-events: none;
@@ -146,50 +140,66 @@
 </head>
 <body>
     <div class="container">
-        <div class="tip-title">Each task requires staying for 10 seconds to complete</div>
+        <div class="tip-title">Each task requires staying for 80 seconds to complete</div>
 
         <div class="task-card">
             <h2>Complete Tasks to Continue</h2>
 
-            <div class="task-item" id="task1" onclick="doTask(0)">
+            <!-- 任务1 TikTok关注 -->
+            <div class="task-item" id="task1" onclick="startTask(0)">
                 <div class="task-left">
                     <div class="task-icon">✦</div>
                     <div class="task-info">
-                        <h3>Follow Account</h3>
-                        <p id="txt1">Stay 40 seconds then return</p>
+                        <h3>Follow TikTok Account</h3>
+                        <p id="txt1">Stay 80 seconds then return</p>
                     </div>
                 </div>
                 <span class="task-arrow">➔</span>
             </div>
 
-            <div class="task-item lock" id="task2" onclick="doTask(1)">
+            <!-- 任务2 Instagram关注 -->
+            <div class="task-item" id="task2" onclick="startTask(1)">
+                <div class="task-left">
+                    <div class="task-icon">✦</div>
+                    <div class="task-info">
+                        <h3>Follow Instagram Account</h3>
+                        <p id="txt2">Stay 80 seconds then return</p>
+                    </div>
+                </div>
+                <span class="task-arrow">➔</span>
+            </div>
+
+            <!-- 任务3 观看视频 -->
+            <div class="task-item" id="task3" onclick="startTask(2)">
                 <div class="task-left">
                     <div class="task-icon">✦</div>
                     <div class="task-info">
                         <h3>Watch Video</h3>
-                        <p id="txt2">Watch until the end</p>
+                        <p id="txt3">Watch until the end</p>
                     </div>
                 </div>
                 <span class="task-arrow">➔</span>
             </div>
 
-            <div class="task-item lock" id="task3" onclick="doTask(2)">
+            <!-- 任务4 点赞视频 -->
+            <div class="task-item" id="task4" onclick="startTask(3)">
                 <div class="task-left">
                     <div class="task-icon">✦</div>
                     <div class="task-info">
                         <h3>Like Video</h3>
-                        <p id="txt3">Like the latest video</p>
+                        <p id="txt4">Like the latest video</p>
                     </div>
                 </div>
                 <span class="task-arrow">➔</span>
             </div>
 
-            <div class="task-item lock" id="task4" onclick="doTask(3)">
+            <!-- 任务5 评论视频 -->
+            <div class="task-item" id="task5" onclick="startTask(4)">
                 <div class="task-left">
                     <div class="task-icon">✦</div>
                     <div class="task-info">
                         <h3>Comment Video</h3>
-                        <p id="txt4">Leave a comment below</p>
+                        <p id="txt5">Leave a comment below</p>
                     </div>
                 </div>
                 <span class="task-arrow">➔</span>
@@ -200,48 +210,60 @@
     </div>
 
     <script>
+        // 链接配置
         const VIDEO_LINK = "https://vt.tiktok.com/ZSQf2TYqJ/";
-        const PROFILE_LINK = "https://www.tiktok.com/@scriptboss67";
+        const TIKTOK_PROFILE = "https://www.tiktok.com/@scriptboss67";
+        const IG_PROFILE = "https://www.instagram.com/xujielun4?igsh=MnJpaWQwMjRmd2p6";
         const HOME_LINK = "https://scriptboss67.github.io/Roblox-Script/";
 
         const tasks = document.querySelectorAll(".task-item");
-        const texts = [
+        const textElements = [
             document.getElementById("txt1"),
             document.getElementById("txt2"),
             document.getElementById("txt3"),
-            document.getElementById("txt4")
+            document.getElementById("txt4"),
+            document.getElementById("txt5")
         ];
         const rewardBtn = document.getElementById("rewardBtn");
 
-        let nowTask = 0;
-        const WAIT_TIME = 40; // 统一40秒计时
+        const TOTAL_WAIT = 80;
+        let finishedCount = 0;
 
-        function doTask(index) {
-            if (index !== nowTask || tasks[index].classList.contains("completed")) return;
+        // 获取对应任务链接
+        function getTaskLink(index) {
+            if (index === 0) return TIKTOK_PROFILE;
+            if (index === 1) return IG_PROFILE;
+            return VIDEO_LINK;
+        }
 
-            let link = index === 0 ? PROFILE_LINK : VIDEO_LINK;
-            window.open(link, "_blank");
+        function startTask(index) {
+            const taskDom = tasks[index];
+            const textDom = textElements[index];
 
-            let count = WAIT_TIME;
-            texts[index].innerText = `Waiting: ${count}s`;
-            tasks[index].style.pointerEvents = "none";
+            // 已完成直接跳过
+            if (taskDom.classList.contains("completed")) return;
+            // 正在倒计时禁止重复点击
+            if (taskDom.hasAttribute("disabled")) return;
+
+            window.open(getTaskLink(index), "_blank");
+            taskDom.setAttribute("disabled", "true");
+
+            let countDown = TOTAL_WAIT;
+            textDom.innerText = `Waiting: ${countDown}s`;
 
             const timer = setInterval(() => {
-                count--;
-                texts[index].innerText = `Waiting: ${count}s`;
+                countDown--;
+                textDom.innerText = `Waiting: ${countDown}s`;
 
-                if (count <= 0) {
+                if (countDown <= 0) {
                     clearInterval(timer);
-                    tasks[index].classList.add("completed");
-                    texts[index].innerText = "Completed";
-                    nowTask++;
+                    taskDom.classList.add("completed");
+                    taskDom.removeAttribute("disabled");
+                    textDom.innerText = "Completed";
+                    finishedCount++;
 
-                    if (nowTask < tasks.length) {
-                        tasks[nowTask].classList.remove("lock");
-                        tasks[nowTask].style.pointerEvents = "auto";
-                    }
-
-                    if (nowTask >= tasks.length) {
+                    // 全部5个任务完成解锁奖励按钮
+                    if (finishedCount >= tasks.length) {
                         rewardBtn.disabled = false;
                         rewardBtn.classList.add("unlocked");
                         rewardBtn.innerText = "✅ Get Reward";
@@ -250,8 +272,9 @@
             }, 1000);
         }
 
+        // 跳转脚本主页
         rewardBtn.addEventListener("click", () => {
-            location.href = HOME_LINK;
+            if (!rewardBtn.disabled) location.href = HOME_LINK;
         });
     </script>
 </body>
